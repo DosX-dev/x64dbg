@@ -2545,18 +2545,19 @@ bool dbggetwintext(std::vector<std::string>* winTextList, const DWORD dwProcessI
     if(!mProcHandle && !mForegroundHandle)
         return false;
 
-    wchar_t limitedbuffer[256];
-    limitedbuffer[255] = 0;
+    // Read one extra character so truncated titles can be detected reliably.
+    // Value-initialization also keeps the fallback safe if both WinAPI calls fail.
+    wchar_t limitedbuffer[257] = {};
 
     if(mProcHandle)  // get info from the "main window" (GW_OWNER + visible)
     {
-        if(!GetWindowTextW((HWND)mProcHandle, limitedbuffer, 256))
-            GetClassNameW((HWND)mProcHandle, limitedbuffer, 256); // go for the class name if none of the above
+        if(!GetWindowTextW((HWND)mProcHandle, limitedbuffer, _countof(limitedbuffer)))
+            GetClassNameW((HWND)mProcHandle, limitedbuffer, _countof(limitedbuffer)); // go for the class name if none of the above
     }
     else if(mForegroundHandle)  // get info from the foreground window
     {
-        if(!GetWindowTextW((HWND)mForegroundHandle, limitedbuffer, 256))
-            GetClassNameW((HWND)mForegroundHandle, limitedbuffer, 256); // go for the class name if none of the above
+        if(!GetWindowTextW((HWND)mForegroundHandle, limitedbuffer, _countof(limitedbuffer)))
+            GetClassNameW((HWND)mForegroundHandle, limitedbuffer, _countof(limitedbuffer)); // go for the class name if none of the above
     }
 
 
